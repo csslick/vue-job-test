@@ -20,8 +20,8 @@
 <style lang="scss">
   nav {
     position: relative;
-    background: pink;
-    border-bottom: #ccc;
+    // background: pink;
+    border-bottom: 1px solid #ccc;
     width: 100%;
     height: 44px;
     padding: 10px;
