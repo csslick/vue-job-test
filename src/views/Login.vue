@@ -1,5 +1,4 @@
 <template>
-  <h2>로그인</h2>
   <div class="login-container">
     <form @submit.prevent="handleLogin">
       <div class="form-group">
@@ -80,6 +79,6 @@ button {
 }
 
 button:hover {
-  background-color: #0056b3;
+  opacity: 0.8;
 }
 </style>
