@@ -1,7 +1,7 @@
 <template>
   <nav>
     <h1>로그인</h1>
-    <router-link to="job-list" class="btn-close">
+    <router-link to="/job-list" class="btn-close">
       <Icon 
         icon="material-symbols:close" 
         width="24" 
@@ -14,7 +14,19 @@
   
 <script setup>
   import { Icon } from '@iconify/vue';
+  import { useRoute } from 'vue-router';
+  import { watch } from 'vue';
 
+  let route = useRoute(); // 경로
+  let currentPath = route.path; // 현재 경로
+  
+  watch(
+    route, 
+    (newRoute) => {
+      currentPath = newRoute.path;
+      console.log(currentPath)
+    }
+  );
 </script>
   
 <style lang="scss">
