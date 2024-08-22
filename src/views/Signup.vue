@@ -23,19 +23,36 @@
 </template>
 
 <script setup>
+import supabase from '../supabase';
 import { ref } from 'vue';
 
 const email = ref('');
 const password = ref('');
 const tel = ref('');
 const text = ref('');
+// const isLoading = ref(false); // 로딩 상태를 저장하는 변수
 
-const handleSignup = () => {
+const handleSignup = async () => {
   // 회원가입 로직
-  console.log('Email:', email.value);
-  console.log('Password:', password.value);
-  console.log('Tel:', tel.value);
-  console.log('Text:', text.value);
+  try {
+    // isLoading.value = true;
+    const { data, error } = await supabase.auth.signUp({
+      email: email.value,
+      password: password.value,
+    })
+
+    if(error) {
+      // supabase.auth.signUp() 함수를 호출해서 회원가입이 실패했을 때
+      alert(error.message); // error는 회원가입 요청의 실패에 대한 응답 정보를 담고 있음
+    } else {
+      console.log('회원가입 성공')
+      console.log(data);
+      // 회원가입 성공시 로그인화면(/)으로 이동
+
+    }
+  } catch (error) { // 예상치 못한 오류(네트워크, 코드 오류 등) 발생시
+    alert('예기치 않은 문제 발생', error);
+  }
 };
 
 </script>
