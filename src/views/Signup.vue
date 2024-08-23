@@ -1,4 +1,7 @@
 <template>
+  <div class="loading_info" v-if="isLoading">
+    <p>회원가입 처리중...</p>
+  </div>
   <div class="form-container">
     <form @submit.prevent="handleSignup">
       <div class="form-group">
@@ -40,12 +43,12 @@ const tel = ref('');
 const text = ref('');
 const name = ref('');
 const addr = ref('');
-// const isLoading = ref(false); // 로딩 상태를 저장하는 변수
+const isLoading = ref(false); // 로딩 상태를 저장하는 변수
 
 const handleSignup = async () => {
   // 회원가입 로직
   try {
-    // isLoading.value = true;
+    isLoading.value = true; // 회원가입 처리중인 상태
     const { data, error } = await supabase.auth.signUp({
       email: email.value,
       password: password.value,
@@ -55,7 +58,7 @@ const handleSignup = async () => {
       // supabase.auth.signUp() 함수를 호출해서 회원가입이 실패했을 때
       alert(error.message); // error는 회원가입 요청의 실패에 대한 응답 정보를 담고 있음
     } else {
-      console.log('회원가입 성공')
+      alert('회원가입 성공')
       console.log(data);
       // 회원가입 성공시 로그인화면(/)으로 이동
 
@@ -71,6 +74,8 @@ const handleSignup = async () => {
     console.log('userData: ', userData)
   } catch (error) { // 예상치 못한 오류(네트워크, 코드 오류 등) 발생시
     alert('예기치 않은 문제 발생', error);
+  } finally {
+    isLoading.value = false; // 요청 작업이 완료되면 로딩 상태를 해제
   }
 };
 
@@ -78,4 +83,14 @@ const handleSignup = async () => {
 
 <style scoped lang="scss">
   @import "../style/form.scss";
+
+  .loading_info {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0, 0.7);
+    color: #fff;
+    display: grid;
+    place-items: center;
+  }
 </style>
