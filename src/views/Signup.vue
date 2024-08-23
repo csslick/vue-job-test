@@ -14,6 +14,14 @@
         <input type="tel" id="tel" v-model="tel" placeholder="010-1234-5678" required />
       </div>
       <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" v-model="name" placeholder="이름 입력" required />
+      </div>
+      <div class="form-group">
+        <label for="addr">Adderss</label>
+        <input type="text" id="addr" v-model="addr" placeholder="주소 입력" required />
+      </div>
+      <div class="form-group">
         <label for="text">자기소개</label>
         <textarea id="text" rows="5" v-model="text"></textarea>
       </div>
@@ -30,6 +38,8 @@ const email = ref('');
 const password = ref('');
 const tel = ref('');
 const text = ref('');
+const name = ref('');
+const addr = ref('');
 // const isLoading = ref(false); // 로딩 상태를 저장하는 변수
 
 const handleSignup = async () => {
@@ -55,6 +65,8 @@ const handleSignup = async () => {
       // id: data.user.id,
       tel: tel.value,
       text: text.value,
+      name: name.value,
+      addr: addr.value,
     })
     console.log('userData: ', userData)
   } catch (error) { // 예상치 못한 오류(네트워크, 코드 오류 등) 발생시
