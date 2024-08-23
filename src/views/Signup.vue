@@ -50,6 +50,13 @@ const handleSignup = async () => {
       // 회원가입 성공시 로그인화면(/)으로 이동
 
     }
+
+    const userData = await supabase.from('user_info').insert({
+      // id: data.user.id,
+      tel: tel.value,
+      text: text.value,
+    })
+    console.log('userData: ', userData)
   } catch (error) { // 예상치 못한 오류(네트워크, 코드 오류 등) 발생시
     alert('예기치 않은 문제 발생', error);
   }
