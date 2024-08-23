@@ -34,9 +34,11 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router';
 import supabase from '../supabase';
 import { ref } from 'vue';
 
+const router = useRouter(); // 라우터 객체를 가져옴
 const email = ref('');
 const password = ref('');
 const tel = ref('');
@@ -61,7 +63,7 @@ const handleSignup = async () => {
       alert('회원가입 성공')
       console.log(data);
       // 회원가입 성공시 로그인화면(/)으로 이동
-
+      router.push('/');
     }
 
     const userData = await supabase.from('user_info').insert({
