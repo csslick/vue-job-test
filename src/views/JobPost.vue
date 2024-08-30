@@ -44,17 +44,23 @@
       </div>
       <div class="form-group">
         <label for="tel">연락처</label>
-        <input type="tel" id="tel" v-model="tel" placeholder="010-123-1234" required />
+        <input 
+          type="tel" id="tel" 
+          v-model="tel" 
+          placeholder="010-123-1234" 
+          required
+      />
       </div>
       <div class="form-group">
         <label for="photo">
           <p class="title">사진(선택)</p>
           <figure>
             <Icon icon="ph:camera-light" width="64" height="64"  style="color: 333" />
-            <img src="/box64x64.jpg" alt="미리보기" width="64" height="64">
+              <img v-if="previewImage" :src="previewImage" alt="미리보기" width="64" height="64">
+              <img v-else="previewImage" src="/box64x64.jpg" alt="미리보기" width="64" height="64">
           </figure>
         </label>          
-        <input type="file" id="photo" />
+        <input type="file" id="photo" @change="handleFileChange" accept="image/*"/>
       </div>
       <button class="btn-submit">등록하기</button>
     </form>
@@ -81,6 +87,30 @@ const desc = ref('');
 const company_name = ref('');
 const location = ref('');
 const tel = ref('');
+
+const  previewImage = ref(null); // 이미지 미리보기를 위한 변수
+
+const handleFileChange = (e) => {
+  // 사용자가 선택한 파일 객체를 가져옵니다.
+  const file = e.target.files[0];
+
+  // 파일이 존재하는지 확인합니다.
+  if (file) {
+    // FileReader 객체를 생성합니다. 이 객체를 사용하여 파일을 비동기적으로 읽을 수 있습니다.
+    const reader = new FileReader();
+
+    // 읽은 파일을 데이터 URL(base64로 인코딩된 문자열)로 변환합니다.
+    reader.readAsDataURL(file);
+
+    // FileReader가 파일을 읽었을 때 이벤트
+    reader.onload = (event) => {
+      // reader.result에 파일의 데이터 URL(base64 형식으로 인코딩한 문자열)을 저장
+      // 이를 previewImage에 저장하여, 이미지 미리보기의 src로 사용합니다.
+      previewImage.value = event.target.result;
+      console.log(event.target.result);
+    };
+  }
+};
 
 // 폼 제출 처리
 const handleSubmit = (e) => {
