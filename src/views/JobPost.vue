@@ -56,8 +56,8 @@
           <p class="title">사진(선택)</p>
           <figure>
             <Icon icon="ph:camera-light" width="64" height="64"  style="color: 333" />
-              <img v-if="previewImage" :src="previewImage" alt="미리보기" width="64" height="64">
-              <img v-else="previewImage" src="/box64x64.jpg" alt="미리보기" width="64" height="64">
+            <img v-if="previewImage" :src="previewImage" alt="미리보기" width="64" height="64">
+            <img v-else="previewImage" src="/box64x64.jpg" alt="미리보기" width="64" height="64">
           </figure>
         </label>          
         <input type="file" id="photo" @change="handleFileChange" accept="image/*"/>
