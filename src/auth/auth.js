@@ -1,12 +1,12 @@
-// src/composables/auth.js
+// src/auth/auth.js
 import supabase from '../supabase';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 export function useAuth() {
   const isLogin = ref(false);
+  const user = ref('');
   const router = useRouter();
-  const user = ref(null);
 
   const checkLoginStatus = async () => {
     const { data } = await supabase.auth.getUser();
