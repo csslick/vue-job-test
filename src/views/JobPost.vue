@@ -62,17 +62,19 @@
 </template>
   
 <script setup>
+import { useAuth } from '../auth/auth';
 import { Icon } from '@iconify/vue';
 import supabase from '../supabase';
 import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+// import { useRouter } from 'vue-router';
 
-const isLogin = ref(false);
-const router = useRouter();
+// const isLogin = ref(false);
+// const router = useRouter();
+const { isLogin, user, checkLoginStatus } = useAuth();
 
+// form 데이터 변수
 const title= ref('');
 const todo = ref('');
-// const pay_rule = ref('pay_rule1'); // 기본값
 const pay_rule = ref('시급');
 const pay = ref('');
 const desc = ref('');
@@ -80,41 +82,56 @@ const company_name = ref('');
 const location = ref('');
 const tel = ref('');
 
+// 폼 제출 처리
 const handleSubmit = (e) => {
   console.log(title.value)
   console.log(todo.value)
   console.log(pay_rule.value)
+  console.log(company_name.value)
   console.log(pay.value)
   console.log(tel.value)
 }
 
 // 페이지 로드 시 로그인 상태 확인
 onMounted(async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  console.log('user: ', user);
-  console.log(user?.email);
+  await checkLoginStatus()
+  // console.log('mounted:', isLogin.value, user.value)
 
-  if (user) {
-    console.log("로그인한 사용자:", user.email);
-    isLogin.value = true;
+  // const { data: { user } } = await supabase.auth.getUser();
+  // console.log('user: ', user);
+  // console.log(user?.email);
 
-    // user.id(uid)와 일치하는 유저 정보 가져오기
+  // 유저 정보 가져오기-전화번호 참조용
+  if (user.value) {
     const { data, error } = await supabase
       .from('user_info')
       .select()
-      .eq('id', user.id);
+      .eq('id', user.value.id);
 
-    // 유저 정보 가져오기
-    console.log("userData: ", data[0]);
+    // console.log("userData: ", data[0]);
     tel.value = data[0].tel; // 전화번호는 유저 데이터 기본값으로 설정(수정 가능)
+  }  
 
-  } else {
-    alert("로그인이 필요합니다.");
-    // 로그인 페이지로 이동
-    router.push('/');
-  }
+  // if (user) {
+  //   console.log("로그인한 사용자:", user.email);
+  //   isLogin.value = true;
+
+  //   // user.id(uid)와 일치하는 유저 정보 가져오기
+  //   const { data, error } = await supabase
+  //     .from('user_info')
+  //     .select()
+  //     .eq('id', user.id);
+
+  //   // 유저 정보 가져오기
+  //   console.log("userData: ", data[0]);
+  //   tel.value = data[0].tel; // 전화번호는 유저 데이터 기본값으로 설정(수정 가능)
+
+  // } else {
+  //   alert("로그인이 필요합니다.");
+  //   // 로그인 페이지로 이동
+  //   router.push('/');
+  // }
 });
-  
 </script>
   
 <style lang="scss">
