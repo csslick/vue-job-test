@@ -1,4 +1,7 @@
 <template>
+  <div class="loading_info" v-if="isLoding">
+    <p>저장중...</p>
+  </div>
   <div class="form-container" v-if="isLogin">
     <!-- <h1>JoBPost</h1> -->
     <form @submit.prevent="handleSubmit">
@@ -34,7 +37,7 @@
         <input 
           type="text" id="company_name" 
           v-model="company_name" 
-          placeholder="공고 내용을 요약해주세요." 
+          placeholder="업체명을 입력해 주세요." 
           required 
         />
       </div>
@@ -56,8 +59,8 @@
           <p class="title">사진(선택)</p>
           <figure>
             <Icon icon="ph:camera-light" width="64" height="64"  style="color: 333" />
-              <img v-if="previewImage" :src="previewImage" alt="미리보기" width="64" height="64">
-              <img v-else="previewImage" src="/box64x64.jpg" alt="미리보기" width="64" height="64">
+            <img v-if="previewImage" :src="previewImage" alt="미리보기" width="64" height="64">
+            <img v-else="previewImage" src="/box64x64.jpg" alt="미리보기" width="64" height="64">
           </figure>
         </label>          
         <input type="file" id="photo" @change="handleFileChange" accept="image/*"/>
@@ -72,10 +75,11 @@ import { useAuth } from '../auth/auth';
 import { Icon } from '@iconify/vue';
 import supabase from '../supabase';
 import { onMounted, ref } from 'vue';
-// import { useRouter } from 'vue-router';
+import { useRouter } from 'vue-router'; 
 
 // const isLogin = ref(false);
-// const router = useRouter();
+const router = useRouter();
+const isLoding = ref(false); // 로딩 상태
 const { isLogin, user, checkLoginStatus } = useAuth();
 
 // form 데이터 변수
@@ -88,7 +92,7 @@ const company_name = ref('');
 const location = ref('');
 const tel = ref('');
 
-const  previewImage = ref(null); // 이미지 미리보기를 위한 변수
+const previewImage = ref(null); // 이미지 미리보기를 위한 변수
 
 const handleFileChange = (e) => {
   // 사용자가 선택한 파일 객체를 가져옵니다.
@@ -113,23 +117,40 @@ const handleFileChange = (e) => {
 };
 
 // 폼 제출 처리
-const handleSubmit = (e) => {
-  console.log(title.value)
-  console.log(todo.value)
-  console.log(pay_rule.value)
-  console.log(company_name.value)
-  console.log(pay.value)
-  console.log(tel.value)
+const handleSubmit = async (e) => {
+  // 로딩 상태 변경
+  isLoding.value = true;
+
+  // job_post_list 테이블에 데이터 추가
+  const { error } = await supabase
+    .from('job_posts')
+    .insert({
+        title: title.value,
+        todo: todo.value,
+        pay_rule: pay_rule.value,
+        pay: pay.value,
+        desc: desc.value,
+        company_name: company_name.value,
+        location: location.value,
+        tel: tel.value,
+        // user_id: user.value.id,
+        img_url: 'https://placehold.co/400',
+    });
+  
+  isLoding.value = false;
+
+  if (error) {
+    alert(error.message);
+    return;
+  } else {
+    alert('등록되었습니다.');
+    router.push('/job-list');
+  }
 }
 
 // 페이지 로드 시 로그인 상태 확인
 onMounted(async () => {
   await checkLoginStatus()
-  // console.log('mounted:', isLogin.value, user.value)
-
-  // const { data: { user } } = await supabase.auth.getUser();
-  // console.log('user: ', user);
-  // console.log(user?.email);
 
   // 유저 정보 가져오기-전화번호 참조용
   if (user.value) {
@@ -141,26 +162,6 @@ onMounted(async () => {
     // console.log("userData: ", data[0]);
     tel.value = data[0].tel; // 전화번호는 유저 데이터 기본값으로 설정(수정 가능)
   }  
-
-  // if (user) {
-  //   console.log("로그인한 사용자:", user.email);
-  //   isLogin.value = true;
-
-  //   // user.id(uid)와 일치하는 유저 정보 가져오기
-  //   const { data, error } = await supabase
-  //     .from('user_info')
-  //     .select()
-  //     .eq('id', user.id);
-
-  //   // 유저 정보 가져오기
-  //   console.log("userData: ", data[0]);
-  //   tel.value = data[0].tel; // 전화번호는 유저 데이터 기본값으로 설정(수정 가능)
-
-  // } else {
-  //   alert("로그인이 필요합니다.");
-  //   // 로그인 페이지로 이동
-  //   router.push('/');
-  // }
 });
 </script>
   
@@ -215,8 +216,10 @@ onMounted(async () => {
         }
       }
     }
-    input[type="file"] {
-      // display: none;
+    // 탭, file 요소 비표시(label로 대체)
+    input[type="file"],
+    input[type="radio"] {
+      display: none;
     }
   }
 
@@ -227,5 +230,15 @@ onMounted(async () => {
   .form-group:has(label[for=photo]) {
     padding-bottom: 25px;
     border-bottom: 5px solid #ccc;
+  }
+
+  .loading_info {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0, 0.7);
+    color: #fff;
+    display: grid;
+    place-items: center;
   }
 </style>
