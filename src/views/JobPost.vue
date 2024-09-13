@@ -134,7 +134,7 @@ const handleSubmit = async (e) => {
         location: location.value,
         tel: tel.value,
         // user_id: user.value.id,
-        img_url: 'https://placehold.co/400',
+        img_url: 'https://placehold.co/64',
     });
   
   isLoding.value = false;
