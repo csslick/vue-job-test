@@ -5,7 +5,11 @@
     <!-- 로그인(/), 회원가입, 구인등록 페이지: 닫기 버튼 -->
     <router-link v-if="currentPath === '/'
       || currentPath === '/signup'
-      || currentPath === '/job-post'" to="/job-list" class="btn-close">
+      || currentPath === '/job-post'
+      || currentPath.startsWith('/job-post-update')" 
+      to="/job-list" 
+      class="btn-close"
+    >
       <Icon icon="material-symbols:close" width="24" height="24" style="color: 1e1e1e" />
     </router-link>
 
@@ -59,6 +63,8 @@ watch(
       title.value = '구인 등록'
     } else if (currentPath === '/user-profile') {
       title.value = '프로필'
+    } else if (currentPath.startsWith('/job-post-update')) {
+      title.value = '구인 등록 수정'
     }
   }
 );
