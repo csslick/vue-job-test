@@ -2,16 +2,18 @@
   <!-- <h1>JobList</h1> -->
   <ul class="job-list">
     <li class="job-item" v-for="post in posts" :key="post.id">
-      <div class="header">
-        <h3>{{post.title}}</h3>
-        <address>{{post.location}}</address>
-        <span>&middot;</span>
-        <time>{{ format(new Date(post.created_at), 'yyyy-MM-dd') }}</time>
-      </div>
-      <div class="bottom-info">
-        <p class="pay">시급: {{ post.pay.toLocaleString() }}원</p>
-        <img :src="post.img_url" alt="image" width="64" height="64">
-      </div>
+      <router-link :to="`/job-detail/${post.id}`">
+        <div class="header">
+          <h3>{{post.title}}</h3>
+          <address>{{post.location}}</address>
+          <span>&middot;</span>
+          <time>{{ format(new Date(post.created_at), 'yyyy-MM-dd') }}</time>
+        </div>
+        <div class="bottom-info">
+          <p class="pay">시급: {{ post.pay.toLocaleString() }}원</p>
+          <img :src="post.img_url" alt="image" width="64" height="64">
+        </div>
+      </router-link>
     </li>
   </ul>
 </template>
