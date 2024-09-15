@@ -10,7 +10,12 @@
           <time>{{ format(new Date(post.created_at), 'yyyy-MM-dd') }}</time>
         </div>
         <div class="bottom-info">
-          <p class="pay">시급: {{ post.pay.toLocaleString() }}원</p>
+          <!-- <p class="pay">시급: {{ post.pay.toLocaleString() }}원</p> -->
+          <p class="pay">
+            <span v-if="post.pay_rule === '시급'">시급</span> 
+            <span v-if="post.pay_rule === '월급'">월급</span>
+            {{ post.pay.toLocaleString() }}원
+          </p>
           <img :src="post.img_url" alt="image" width="64" height="64">
         </div>
       </router-link>
@@ -46,6 +51,8 @@ onMounted(async () => {
 </script>
 
 <style scoped lanh="scss">
+a { text-decoration: none;}
+
 ul {
   list-style: none;
   padding: 0;

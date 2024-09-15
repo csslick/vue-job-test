@@ -16,10 +16,20 @@
       <p class="pay">시급: <b>{{ post.pay.toLocaleString() }}</b>원</p>
       <textarea class="desc" rows="5" readonly>{{ post.desc }}</textarea>
     </div>
-    <!-- 하단 고정 버튼 -->
-    <div class="bottom-btn-group">
+    <!-- 하단 고정 버튼(작성자 글이 아닐 때만 노출) -->
+    <div class="bottom-btn-group" v-if="!isMyPost">
       <button class="btn-tel">전화문의</button>
       <button class="btn-apply">지원하기</button>
+    </div>
+    <!-- 하단 고정 버튼(작성자 글일 때만 노출) -->
+    <div class="bottom-btn-group" v-if="isMyPost">
+      <!-- <button class="btn-tel">수정</button> -->
+      <router-link 
+        class="btn-tel" 
+        :to="`/job-post-update/${post.id}`"
+      >수정
+      </router-link>
+      <button class="btn-apply">삭제</button>
     </div>
   </section>
 </template>
@@ -27,15 +37,16 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import supabase from '../supabase'; // Supabase 클라이언트 설정
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuth } from '../auth/auth'; // ① 로그인 상태 확인 함수 가져오기
 
-const route = useRoute();
+// const router = useRouter(); // 페이지 이동을 위한 라우터 객체(router와 구분 주의)
+const route = useRoute(); // 경로 참조 객체
 const id = route.params.id; // 현재 경로의 매개변수를 가져옴
 const post = ref(null); // 구인 데이터를 저장할 변수
 console.log(route.params);
 const { isLogin, user, checkLoginStatus } = useAuth(); // ② 로그인 상태 확인 함수 가져오기
-
+const isMyPost = ref(false); // 내가 올린 게시글인지 확인하는 변수
 
 onMounted(async () => {
   await checkLoginStatus(); // 로그인 상태 확인
@@ -51,6 +62,12 @@ onMounted(async () => {
 
     post.value = data;
     console.log(post.value);
+
+    /// 내가 올린 게시글인지 확인
+    if(user.value.id === post.value.author) {
+      isMyPost.value = true;
+      console.log(user.value.id, post.value.author);
+    }
 
     if (error) {
       alert(error.message);
@@ -107,13 +124,16 @@ textarea {
   width: 100%;
   display: flex;
 
-  button {
+  button, [class^="btn-"] {
     width: 50%;
     border-radius: 0;
     padding-top: 14px;
     padding-bottom: 14px;
     margin: 0;
     cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
   }
 
   .btn-tel {

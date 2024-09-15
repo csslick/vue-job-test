@@ -5,6 +5,7 @@ import JobList from './views/JobList.vue';
 import JobDetail from './views/JobDetail.vue';
 import JobPost from "./views/JobPost.vue";
 import UserProfile from './views/UserProfile.vue';
+import JobPostUpdate from './views/JobPostUpdate.vue';
 
 // ❷
 const routes = [
@@ -31,6 +32,10 @@ const routes = [
   {
     path: "/user-profile",
     component: UserProfile,
+  },
+  {
+    path: "/job-post-update/:id",
+    component: JobPostUpdate,
   },
 ];
 
