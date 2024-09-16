@@ -29,7 +29,7 @@
         :to="`/job-post-update/${post.id}`"
       >수정
       </router-link>
-      <button class="btn-apply">삭제</button>
+      <button class="btn-apply" @click="handleDelete()">삭제</button>
     </div>
   </section>
 </template>
@@ -47,7 +47,28 @@ const post = ref(null); // 구인 데이터를 저장할 변수
 console.log(route.params);
 const { isLogin, user, checkLoginStatus } = useAuth(); // ② 로그인 상태 확인 함수 가져오기
 const isMyPost = ref(false); // 내가 올린 게시글인지 확인하는 변수
+const router = useRouter(); // 페이지 이동을 위한 라우터 객체(router와 구분 주의)
 
+const handleDelete = async () => {
+  // 삭제 확인 대화상자 표시
+  const conf = confirm('정말 삭제하시겠습니까?');
+  if (!conf) return;
+
+  const { error } = await supabase
+    .from('job_posts')
+    .delete()
+    .eq('id', id);
+    console.log(error);
+    if (error) {
+      alert(error.message);
+      return;
+    } else {
+      alert('삭제가 완료되었습니다.');
+      router.push('/job-list');
+    }
+}
+
+// 페이지 로딩 시 실행할 코드
 onMounted(async () => {
   await checkLoginStatus(); // 로그인 상태 확인
   console.log(isLogin.value, user.value, isLogin.value);
