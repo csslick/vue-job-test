@@ -14,6 +14,21 @@
     </div>
 
     <button class="logout" @click="handleLogout">로그아웃</button>
+
+    <details class="job-list">
+      <summary>내 지원 내역</summary>
+      <p v-for="job in job_apply_list" :key="job.id">
+        <span>[지원완료] {{ job.job_title }}</span>
+        <time>{{ new Date(job.created_at).toLocaleDateString() }}</time>
+      </p>
+    </details>
+    <details class="job-list">
+      <summary>받은 지원 내역</summary>
+      <p v-for="job in job_recieve_list" :key="job.id">
+        <span>{{ job.applicant_name }}님이 <q>{{ job.job_title }}</q>에 지원했습니다.</span>
+        <time>{{ new Date(job.created_at).toLocaleDateString() }}</time>
+      </p>
+    </details>
   </div>
 </template>
 
@@ -29,6 +44,9 @@ const text = ref('자기소개');
 const isLogin = ref(false);
 const router = useRouter();
 
+const job_apply_list = ref([]); // 지원 내역
+const job_recieve_list = ref([]); // 받은 지원 내역
+
 const handleLogout = async () => {
   const { error } = await supabase.auth.signOut();
   if (error) {
@@ -37,6 +55,37 @@ const handleLogout = async () => {
   alert("로그아웃 되었습니다.");
   router.push('/'); // 로그인 페이지로 이동
 }
+
+// job_apply_list 테이블에서 받은 지원 내역 가져오기
+const getRecieveList = async (userId) => {
+  const { data, error } = await supabase
+    .from('job_apply_list')
+    .select()
+    .eq('employer_id', userId)
+
+    if(error) {
+      alert(error.message);
+      return;
+    }
+
+    job_recieve_list.value = data; // 받은 지원 내역 저장
+}   
+
+// job_apply_list 테이블에서 내가 지원한 내역 가져오기
+const getApplyList = async (userId) => {
+  const { data, error } = await supabase
+    .from('job_apply_list')
+    .select()
+    .eq('applicant_id', userId);  // 내 id에 해당하는 지원자 글을 검색
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    console.log(data);
+    job_apply_list.value = data; // 지원 내역 저장
+}
+
 
 // 페이지 로드 시 로그인 상태 확인
 onMounted(async () => {
@@ -61,6 +110,9 @@ onMounted(async () => {
       addr.value = data[0].addr;
       text.value = data[0].text;
     }
+
+    await getApplyList(user.id);
+    await getRecieveList(user.id);
   } else {
     alert("로그인이 필요합니다.");
     // 로그인 페이지로 이동
@@ -140,6 +192,34 @@ onMounted(async () => {
       border-radius: 8px;
       padding: 12px 1rem;
     }
+  }
+
+
+  .job-list {
+    list-style-type: none;
+    font-size: 14px;
+    padding: 1rem 0;
+    summary {
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #d9d9d9;
+    }
+
+    p {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      time {
+        color: #777;
+        font-size: 12px;
+        font-weight: 400;
+        width: 10em;
+        // outline: 1px solid red;
+        text-align: right;
+      }
+    }
+
+    q { font-weight: bold;}
   }
 
 </style>
