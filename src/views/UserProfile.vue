@@ -200,6 +200,8 @@ onMounted(async () => {
     font-size: 14px;
     padding: 1rem 0;
     summary {
+      font-size: 16px;
+      font-weight: bold;
       margin-bottom: 10px;
       padding-bottom: 10px;
       border-bottom: 1px solid #d9d9d9;
