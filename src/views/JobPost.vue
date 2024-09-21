@@ -91,20 +91,23 @@ const desc = ref('');
 const company_name = ref('');
 const location = ref('');
 const tel = ref('');
+const img_url = ref(''); // 이미지 url 변수
+const file = ref(null); // 파일 객체를 저장하는 변수
 
 const previewImage = ref(null); // 이미지 미리보기를 위한 변수
 
 const handleFileChange = (e) => {
   // 사용자가 선택한 파일 객체를 가져옵니다.
-  const file = e.target.files[0];
+  // const file = e.target.files[0];
+  file.value = e.target.files[0];
 
   // 파일이 존재하는지 확인합니다.
-  if (file) {
+  if (file.value) {
     // FileReader 객체를 생성합니다. 이 객체를 사용하여 파일을 비동기적으로 읽을 수 있습니다.
     const reader = new FileReader();
 
     // 읽은 파일을 데이터 URL(base64로 인코딩된 문자열)로 변환합니다.
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(file.value);
 
     // FileReader가 파일을 읽었을 때 이벤트
     reader.onload = (event) => {
@@ -116,10 +119,43 @@ const handleFileChange = (e) => {
   }
 };
 
+// 이미지 업로드 함수
+const uploadImage = async () => {
+  console.log('file.value: ', file.value);
+  const { data, error } = await supabase.storage
+    .from('images') // 버킷 이름
+    .upload(`${file.value.name}`, file.value, {
+      cacheControl: '3600', // 캐시 설정 (선택 사항)
+      upsert: false, // 이미 존재하는 파일 덮어쓰기 여부
+    });
+
+  if (error) {
+    alert('Error uploading file:', error);
+  } else {
+    console.log('Uploaded file:', data);
+    // 업로드된 이미지의 URL을 가져옵니다.
+    const { data:imgData } = await supabase
+      .storage
+      .from('images')
+      .getPublicUrl(file.value.name);
+      console.log(imgData.publicUrl); // 이미지 URL 알아냅니다
+
+    img_url.value = imgData.publicUrl; // 반환된 이미지 URL 저장
+  }
+};
+
 // 폼 제출 처리
 const handleSubmit = async (e) => {
   // 로딩 상태 변경
   isLoding.value = true;
+
+  // 파일 업로드
+  if (previewImage.value) {
+    // const file = e.target.files[0];
+    // file.value = e.target.files[0];
+    await uploadImage();
+    console.log(file);
+  }
 
   // job_post_list 테이블에 데이터 추가
   const { error } = await supabase
@@ -134,7 +170,8 @@ const handleSubmit = async (e) => {
         location: location.value,
         tel: tel.value,
         // user_id: user.value.id,
-        img_url: 'https://placehold.co/64',
+        // img_url: 'https://placehold.co/64',
+        img_url: img_url.value,
     });
   
   isLoding.value = false;
