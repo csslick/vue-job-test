@@ -92,29 +92,55 @@ const desc = ref('');
 const company_name = ref('');
 const location = ref('');
 const tel = ref('');
-const img_url = ref('');
-
-const previewImage = ref(null); // 이미지 미리보기를 위한 변수
+const img_url = ref(''); // 이미지 url 변수
+const file = ref(null); // - 파일 객체를 저장하는 변수
+const previewImage = ref(null); // 이미지 미리보기(base64)를 위한 변수
+const prev_img_url = ref(''); // 이전 이미지 url 변수
 
 const handleFileChange = (e) => {
   // 사용자가 선택한 파일 객체를 가져옵니다.
-  const file = e.target.files[0];
+  file.value = e.target.files[0];
 
   // 파일이 존재하는지 확인합니다.
-  if (file) {
+  if (file.value) { // - 파일이 존재하면
     // FileReader 객체를 생성합니다. 이 객체를 사용하여 파일을 비동기적으로 읽을 수 있습니다.
     const reader = new FileReader();
 
     // 읽은 파일을 데이터 URL(base64로 인코딩된 문자열)로 변환합니다.
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(file.value); // - 파일을 읽어서 데이터 URL로 변환
 
     // FileReader가 파일을 읽었을 때 이벤트
     reader.onload = (event) => {
       // reader.result에 파일의 데이터 URL(base64 형식으로 인코딩한 문자열)을 저장
       // 이를 previewImage에 저장하여, 이미지 미리보기의 src로 사용합니다.
       previewImage.value = event.target.result;
-      console.log(event.target.result);
     };
+  }
+};
+
+// 이미지 업로드 함수
+const uploadImage = async () => {
+  console.log('file.value: ', file.value);
+  const { data, error } = await supabase.storage
+    .from('images') // 버킷 이름
+    .upload(`${file.value.name}`, file.value, {
+      cacheControl: '3600', // 캐시 설정 (선택 사항)
+      upsert: false, // 이미 존재하는 파일 덮어쓰기 여부
+    });
+
+  if (error) {
+    alert('Error uploading file:', error);
+  } else {
+    console.log('Uploaded file:', data);
+    // 업로드된 이미지의 URL을 가져옵니다.
+    const { data:imgData } = await supabase
+      .storage
+      .from('images')
+      .getPublicUrl(file.value.name);
+      console.log(imgData.publicUrl); // 이미지 URL 알아냅니다
+
+    img_url.value = imgData.publicUrl; // 반환된 이미지 URL 저장
+    console.log(img_url.value);
   }
 };
 
@@ -122,6 +148,23 @@ const handleFileChange = (e) => {
 const handleSubmit = async (e) => {
   // 로딩 상태 변경
   isLoding.value = true;
+
+  // 파일 업로드
+  if (file.value) {
+    // 이전 이미지 파일과 다른 경우에만 업로드
+    if (!prev_img_url.value.includes(file.value.name)) {
+      console.log('file.value: ', file.value.name);
+      await uploadImage();
+
+      // 이전 이미지 삭제
+      const { error:uploadErr } = await supabase
+        .storage
+        .from('images')
+        .remove([prev_img_url.value.split('/').pop()]); // prev_img_url에서 파일 이름 추출
+    } 
+  } else {
+    img_url.value = prev_img_url.value; // 파일 추가 안하면 이전 이미지 사용
+  }
 
   // job_post_list 테이블에 데이터 추가
   const { error } = await supabase
@@ -135,8 +178,8 @@ const handleSubmit = async (e) => {
         company_name: company_name.value,
         location: location.value,
         tel: tel.value,
-        // user_id: user.value.id,
-        img_url: 'https://placehold.co/64',
+        // img_url: 'https://placehold.co/64', 
+        img_url: img_url.value,
     })
     .eq('id', id);
   
@@ -146,6 +189,8 @@ const handleSubmit = async (e) => {
     alert(error.message);
     return;
   } else {
+    console.log('img_url: ', img_url.value); // - 현재(변경된)이미지 URL
+    console.log('prev_img: ', prev_img_url.value); // - 이전 이미지 URL
     alert('수정이 완료되었습니다.');
     router.push('/job-list');
   }
@@ -171,6 +216,7 @@ const getPost = async () => {
     location.value = post.data.location;
     tel.value = post.data.tel;
     previewImage.value = post.data.img_url; // - 이미지 URL 설정
+    prev_img_url.value = post.data.img_url; // - 수정 전 이미지 URL
 }
 
 // 페이지 로드 시 로그인 상태 확인 수정할 글 데이터 가져오기
