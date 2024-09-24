@@ -97,16 +97,37 @@ const handleApply = async () => {
 
 };
 
+// 이미지 삭제 함수
+const deleteImage = async () => {
+  const { data, error } = await supabase
+    .from('job_posts')
+    .select('img_url')
+    .eq('id', id)
+    .single();
+  console.log(data);
+
+  if(data.img_url) {
+    const { error: img_del_err } = await supabase
+      .storage
+      .from('images')
+      .remove([data.img_url.split('/').pop()]); // img_url에서 파일 이름 추출
+  }
+}
+
 const handleDelete = async () => {
   // 삭제 확인 대화상자 표시
   const conf = confirm('정말 삭제하시겠습니까?');
   if (!conf) return;
+
+  // 이미지 삭제 함수 호출
+  await deleteImage();
 
   const { error } = await supabase
     .from('job_posts')
     .delete()
     .eq('id', id);
     console.log(error);
+    
     if (error) {
       alert(error.message);
       return;
