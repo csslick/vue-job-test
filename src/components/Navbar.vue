@@ -2,11 +2,12 @@
   <nav>
     <h1>{{ title }}</h1>
     <!-- 조건부 표시 아이콘 -->
-    <!-- 로그인(/), 회원가입, 구인등록 페이지: 닫기 버튼 -->
+    <!-- 로그인(/), 회원가입, 구인등록, 프로필 수정 페이지: 닫기 버튼 -->
     <router-link v-if="currentPath === '/'
       || currentPath === '/signup'
       || currentPath === '/job-post'
-      || currentPath.startsWith('/job-post-update')" 
+      || currentPath.startsWith('/job-post-update')
+      || currentPath === '/update-profile'"
       to="/job-list" 
       class="btn-close"
     >
@@ -65,6 +66,8 @@ watch(
       title.value = '프로필'
     } else if (currentPath.startsWith('/job-post-update')) {
       title.value = '구인 등록 수정'
+    } else if(currentPath === '/update-profile') {
+      title.value = '프로필 수정'
     }
   }
 );
