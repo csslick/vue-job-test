@@ -2,7 +2,13 @@
   <div class="form-container" v-if="isLogin">
     <!-- <h1>UserProfile</h1> -->
     <div class="top-info-box">
-      <img src="/vite.svg" alt="profile">
+      <img 
+        src="/vite.svg" 
+        alt="profile" 
+        @click="() => {
+          router.push('/update-profile');
+        }" 
+      />
       <div class="right-info">
         <span class="name">{{ name }}</span>
         <address>{{ addr }}</address>

@@ -151,11 +151,9 @@ const handleSubmit = async (e) => {
 
   // 파일 업로드
   if (previewImage.value) {
-    // const file = e.target.files[0];
-    // file.value = e.target.files[0];
     await uploadImage();
     console.log(file);
-  }
+  } 
 
   // job_post_list 테이블에 데이터 추가
   const { error } = await supabase

@@ -2,7 +2,7 @@
   <!-- <h1>JobDetail</h1> -->
   <section v-if="isLogin"> <!-- ③ 로그인 상태일 때만 노출 -->
     <!-- 대표 이미지 -->
-    <figure v-if="post">
+    <figure v-if="post.img_url">
       <img :src="post.img_url" alt="head image">
     </figure>
     <!-- 상세 정보 -->
