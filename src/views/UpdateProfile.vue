@@ -71,6 +71,20 @@ const handleSubmit = async () => {
         router.push('/user-profile');
       }
     }
+  } else {
+    // 파일을 첨부하지 않은 경우, user_info 테이블에 text만 저장
+    const { data, error } = await supabase
+      .from('user_info')
+      .update({
+          text: text.value,
+        })
+      .eq('id', userId.value); // 현재 로그인한 유저 아이디(user.id)와 일치하는 데이터 조회
+      if (error) {
+      console.log(error, '프로필 수정 실패');
+      } else {
+        alert('프로필 수정 완료');
+        router.push('/user-profile');
+      }
   }
 
 }
