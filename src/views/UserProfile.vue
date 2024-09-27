@@ -3,7 +3,16 @@
     <!-- <h1>UserProfile</h1> -->
     <div class="top-info-box">
       <img 
-        src="/vite.svg" 
+        v-if="profile_img"
+        :src="profile_img" 
+        alt="profile" 
+        @click="() => {
+          router.push('/update-profile');
+        }" 
+      />
+      <img 
+        v-if="!profile_img"
+        src="/box64x64.jpg" 
         alt="profile" 
         @click="() => {
           router.push('/update-profile');
@@ -46,6 +55,7 @@ import { useRouter } from 'vue-router';
 const name = ref('이름');
 const addr = ref('주소');
 const text = ref('자기소개');
+const profile_img = ref(null);
 
 const isLogin = ref(false);
 const router = useRouter();
@@ -115,6 +125,7 @@ onMounted(async () => {
       name.value = data[0].name;
       addr.value = data[0].addr;
       text.value = data[0].text;
+      profile_img.value = data[0].profile_img; // 이미지 주소 저장
     }
 
     await getApplyList(user.id);

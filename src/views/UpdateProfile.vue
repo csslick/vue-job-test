@@ -1,20 +1,16 @@
 <template>
   <div class="form-container" v-if="isLogin">
-    <form>
+    <form @submit.prevent="handleSubmit">
       <figure>
         <label for="profile_img">
-          <img v-if="previewImage" :src="previewImage" alt="profile"/>
-          <img v-if="!previewImage" src="/box64x64.jpg" alt="profile"/>
-          <Icon class="icon" icon="mdi:pencil-circle" width="32" height="32"  style="color: 4b3c30" />
+          <img v-if="previewImage" :src="previewImage" alt="profile" />
+          <img v-if="!previewImage" src="/box64x64.jpg" alt="profile" />
+          <Icon class="icon" icon="mdi:pencil-circle" width="32" height="32" style="color: 4b3c30" />
         </label>
       </figure>
-      <input 
-        type="file" name="profile_img" id="profile_img"
-        @change="handleFileChange"
-        accept="image/*"
-      />
+      <input type="file" name="profile_img" id="profile_img" @change="handleFileChange" accept="image/*" />
       <label for="text" id="text">자기소개</label>
-      <textarea name="text" id="text" rows="5">{{ text }}</textarea>
+      <textarea name="text" id="text" rows="5" v-model="text">{{ text }}</textarea>
       <button class="logout">수정 완료</button>
     </form>
   </div>
@@ -30,18 +26,63 @@ const router = useRouter();
 const isLogin = ref(false);
 const text = ref('');
 
+const file = ref(null); // 오픈한 이미지 객체 저장 변수
 const previewImage = ref(null); // 이미지 미리보기 변수
+const img_url = ref(null); // 이미지 url 저장 변수
+const userId = ref(null); // 로그인한 유저 아이디(auth) 저장 변수(user_info 테이블 위치 참조용)
+
+// 폼 제출 핸들러
+const handleSubmit = async () => {
+  // 파일을 첨부한 경우, images 버킷의 /profile 폴더에 이미지 저장
+  if (file.value) {
+    const { data, error } = await supabase.storage
+      .from('images')
+      .upload(`profile/${file.value.name}`, file.value, {
+        cacheControl: '3',
+        upsert: false,
+      })
+
+    if (error) {
+      alert(error, '이미지 업로드 실패');
+    } else {
+      // 업로드된 이미지의 URL을 가져옴
+      const { data: imgData } = await supabase
+        .storage
+        .from('images/profile')
+        .getPublicUrl(file.value.name); // 이미지 URL 가져오기
+      console.log('img_url: ', imgData.publicUrl);
+
+      // 반환된 이미지 URL(user_info 테이블에 주소값을 저장하는 변수)
+      img_url.value = imgData.publicUrl;
+
+      // user_info 테이블에 text와 이미지 주소 저장
+      const { data, error } = await supabase
+        .from('user_info')
+        .update({
+            text: text.value,
+            profile_img: img_url.value,
+          })
+        .eq('id', userId.value); // 현재 로그인한 유저 아이디(user.id)와 일치하는 데이터 조회
+      
+      if (error) {
+        console.log(error, '프로필 수정 실패');
+      } else {
+        alert('프로필 수정 완료');
+        router.push('/user-profile');
+      }
+    }
+  }
+
+}
 
 // 파일 변경 이벤트 핸들러
 const handleFileChange = (e) => {
-  const file = e.target.files[0]; // 사용자가 선택한 파일 객체를 가져옵니다.
-  console.log('file: ', file);
+  file.value = e.target.files[0]; // 사용자가 선택한 파일 객체를 가져옵니다.
+  console.log('file: ', file.value);
 
-  if (file) {
-    // 파일이 선택된 경우 이미지 미리보기 업데이트
-    previewImage.value = URL.createObjectURL(file);
-    // URL 메모리 해제
-    // URL.revokeObjectURL(previewImage.value);
+  // 파일이 선택된 경우 이미지 미리보기 업데이트
+  if (file.value) {
+    previewImage.value = URL.createObjectURL(file.value);
     console.log('previewImage: ', previewImage.value);
   }
 };
@@ -54,7 +95,7 @@ onMounted(async () => {
     console.log('user: ', user);
     isLogin.value = true; // 로그인 상태 확인
 
-    const id = user.id; // id 가져오기
+    userId.value = user.id; // id 가져오기
 
     // user_info 테이블에서 내 정보 가져오기
     const { data, error } = await supabase
@@ -64,6 +105,7 @@ onMounted(async () => {
       .single();
     console.log(data);
     text.value = data.text;
+    img_url.value = data.profile_img; // 이미지 주소 저장
   } else {
     alert('로그인이 필요합니다.');
     router.push('/');
@@ -117,11 +159,12 @@ figure {
     display: inline-block;
 
     img {
-    width: inherit;
-    height: inherit;
-    border-radius: 50%;
-    background: #ccc;
-  }
+      width: inherit;
+      height: inherit;
+      border-radius: 50%;
+      background: #ccc;
+    }
+
     .icon {
       position: absolute;
       bottom: 0;
@@ -144,5 +187,4 @@ textarea {
   padding: 12px 1rem;
   margin-bottom: 60px;
 }
-
 </style>
