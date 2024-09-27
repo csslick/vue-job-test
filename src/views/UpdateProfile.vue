@@ -30,6 +30,7 @@ const file = ref(null); // 오픈한 이미지 객체 저장 변수
 const previewImage = ref(null); // 이미지 미리보기 변수
 const img_url = ref(null); // 이미지 url 저장 변수
 const userId = ref(null); // 로그인한 유저 아이디(auth) 저장 변수(user_info 테이블 위치 참조용)
+const prev_img_url = ref(null); // -이전 이미지 url 저장 변수
 
 // 폼 제출 핸들러
 const handleSubmit = async () => {
@@ -67,6 +68,16 @@ const handleSubmit = async () => {
       if (error) {
         console.log(error, '프로필 수정 실패');
       } else {
+        // 이전 이미지 삭제
+        if(prev_img_url.value) {
+          const { error:deleteErr } = await supabase
+            .storage
+            .from('images')
+            .remove(`profile/${[prev_img_url.value.split('/').pop()]}`);
+          if (deleteErr) {
+            console.log(deleteErr, '이전 이미지 삭제 실패');
+          }
+        }
         alert('프로필 수정 완료');
         router.push('/user-profile');
       }
@@ -120,6 +131,7 @@ onMounted(async () => {
     console.log(data);
     text.value = data.text;
     img_url.value = data.profile_img; // 이미지 주소 저장
+    prev_img_url.value = data.profile_img; // - 이전 이미지 주소 저장
   } else {
     alert('로그인이 필요합니다.');
     router.push('/');
